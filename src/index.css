@@ -7,6 +7,7 @@
 @layer base {
   * {
     @apply border-zinc-200 dark:border-zinc-800;
+    box-sizing: border-box;
   }
 
   html,
@@ -17,6 +18,7 @@
 
   body {
     @apply font-display antialiased bg-mist text-ink transition-colors duration-300 dark:bg-zinc-950 dark:text-zinc-100;
+    overflow-x: clip;
     background-image: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.75), transparent 28%),
       radial-gradient(circle at 80% 5%, rgba(220, 220, 220, 0.35), transparent 25%);
   }
@@ -24,6 +26,15 @@
   .dark body {
     background-image: radial-gradient(circle at 20% 15%, rgba(60, 60, 60, 0.2), transparent 25%),
       radial-gradient(circle at 85% 10%, rgba(20, 20, 20, 0.8), transparent 35%);
+  }
+
+  #root,
+  main,
+  section,
+  div,
+  article {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 
@@ -137,5 +148,343 @@
       linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
     background-size: 42px 42px;
     mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+
+  html {
+    font-size: 15px;
+  }
+
+  .shell {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
+  .inline-btn,
+  .inline-btn-primary {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8125rem;
+    line-height: 1rem;
+  }
+
+  header .shell nav {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 0.6rem;
+  }
+
+  header .shell nav a {
+    font-size: 0.78rem;
+  }
+
+  header .shell > div:last-child {
+    gap: 0.375rem;
+  }
+
+  .glass-card {
+    border-radius: 1.15rem;
+  }
+
+  h1 {
+    line-height: 1.02;
+  }
+
+  h2 {
+    line-height: 1.08;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  .shell {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .inline-btn,
+  .inline-btn-primary {
+    gap: 0.35rem;
+    padding: 0.4rem 0.66rem;
+    font-size: 0.72rem;
+    line-height: 0.96rem;
+  }
+
+  .vm-product-card {
+    padding: 0.5rem;
+    border-radius: 1rem;
+  }
+
+  .vm-product-card p,
+  .vm-product-card h3,
+  .vm-product-card a,
+  .vm-product-card button {
+    font-size: 0.72rem;
+    line-height: 1rem;
+  }
+
+  header .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 0.35rem;
+    row-gap: 0.28rem;
+    height: auto;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  header .shell > a:first-child {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  header .shell > a:first-child img {
+    height: 1.4rem;
+  }
+
+  header .shell > a:first-child span {
+    font-size: 0.92rem;
+    line-height: 0.95rem;
+    display: block;
+    max-width: 6.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  header .shell > div:last-child {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    margin-left: auto;
+    flex-shrink: 0;
+    gap: 0.16rem;
+  }
+
+  header .shell nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin-top: 0.24rem;
+    gap: 0.28rem;
+    padding-top: 0.08rem;
+    padding-bottom: 0.2rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    justify-content: center;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  header .shell nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  header .shell nav a {
+    font-size: 0.58rem;
+    line-height: 0.82rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  header .shell > div:last-child .inline-btn {
+    padding: 0.2rem 0.26rem;
+    font-size: 0.5rem;
+    line-height: 0.68rem;
+    border-radius: 9999px;
+  }
+
+  header .shell > div:last-child .inline-btn svg {
+    width: 0.82rem;
+    height: 0.82rem;
+  }
+
+  .vm-hero {
+    padding: 1.05rem;
+    min-height: 24rem;
+    border-radius: 1.9rem;
+  }
+
+  .vm-hero > img {
+    height: 100%;
+    transform: none;
+    opacity: 0.42;
+    object-position: center 42%;
+  }
+
+  .vm-hero h1 {
+    font-size: 2rem;
+    line-height: 0.98;
+  }
+
+  .vm-hero p {
+    line-height: 1.2rem;
+    font-size: 0.9rem;
+    max-width: 95%;
+  }
+
+  .vm-hero .inline-btn,
+  .vm-hero .inline-btn-primary {
+    font-size: 0.78rem;
+    line-height: 1rem;
+    padding: 0.46rem 0.74rem;
+  }
+
+  .vm-hero .inline-flex.rounded-full {
+    font-size: 0.72rem;
+    line-height: 1rem;
+    padding: 0.38rem 0.56rem;
+    max-width: 100%;
+  }
+
+  .reveal .overflow-x-auto > a,
+  .overflow-x-auto > a {
+    flex: 0 0 auto;
+    max-width: 100%;
+    font-size: 0.65rem;
+    padding-left: 0.56rem;
+    padding-right: 0.56rem;
+  }
+
+  .grid.grid-cols-3 {
+    gap: 0.46rem;
+  }
+
+  .vm-product-card > a {
+    min-height: 9rem !important;
+    height: 9rem !important;
+  }
+
+  .vm-product-card .inline-btn,
+  .vm-product-card .inline-btn-primary {
+    font-size: 0.64rem;
+    line-height: 0.8rem;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .vm-product-actions {
+    gap: 0.42rem;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .vm-product-add-btn,
+  .vm-product-view-btn {
+    min-width: 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .vm-product-add-btn {
+    justify-content: center;
+    font-size: 0.56rem;
+    line-height: 0.72rem;
+    height: auto !important;
+    min-height: 1.9rem;
+    padding-left: 0.22rem;
+    padding-right: 0.22rem;
+  }
+
+  .vm-product-view-btn {
+    justify-content: center;
+    text-align: center;
+    font-size: 0.46rem;
+    line-height: 0.6rem;
+    padding-left: 0.18rem;
+    padding-right: 0.18rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    height: auto !important;
+    min-height: 1.9rem;
+  }
+
+
+  .vm-product-price {
+    min-width: 0;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .vm-product-card .absolute.left-3.top-3 button {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+
+  .vm-product-card .absolute.left-3.top-3 button svg {
+    width: 0.72rem;
+    height: 0.72rem;
+  }
+
+  header {
+    overflow-x: clip;
+  }
+
+  footer .shell {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+
+  footer .shell > div {
+    min-width: 0;
+    flex: 0 1 8.6rem;
+    text-align: center;
+  }
+
+  footer .shell p,
+  footer .shell h3 {
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  footer .shell > div:first-child h3 {
+    font-size: 1rem;
+    line-height: 0.92;
+    white-space: normal !important;
+    max-width: 100%;
+  }
+
+  footer .shell > div:first-child > div {
+    justify-content: center;
+  }
+
+  footer .shell p {
+    font-size: 0.68rem;
+    line-height: 1rem;
+  }
+
+  footer .shell > div:first-child img {
+    height: 1.45rem;
+  }
+
+  footer .shell > div:nth-child(2) p,
+  footer .shell > div:nth-child(3) p {
+    line-height: 0.95rem;
   }
 }

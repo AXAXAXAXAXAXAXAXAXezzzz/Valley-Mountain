@@ -8,6 +8,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import CompleteProfilePage from "./pages/CompleteProfilePage";
 import SupportPage from "./pages/SupportPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
@@ -15,10 +16,21 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { useAuth } from "./context/AuthContext";
 
 function ProtectedRoute({ children, adminOnly = false }) {
-  const { user } = useAuth();
+  const { user, authReady, needsProfileCompletion } = useAuth();
+  if (!authReady) return null;
   if (!user) return <Navigate to="/login" replace />;
-  if (adminOnly && !user.isAdmin) return <Navigate to="/admin/login" replace />;
+  const hasAdminWorkspaceAccess = user?.isAdmin || ["admin", "mentor", "support"].includes(user?.role);
+  if (adminOnly && !hasAdminWorkspaceAccess) return <Navigate to="/admin/login" replace />;
+  if (!adminOnly && needsProfileCompletion) return <Navigate to="/complete-profile" replace />;
   return children;
+}
+
+function CompleteProfileRoute() {
+  const { user, authReady, needsProfileCompletion } = useAuth();
+  if (!authReady) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!needsProfileCompletion) return <Navigate to="/profile" replace />;
+  return <CompleteProfilePage />;
 }
 
 export default function App() {
@@ -56,6 +68,7 @@ export default function App() {
         <Route path="/profile/support" element={<Navigate to="/support" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/complete-profile" element={<CompleteProfileRoute />} />
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route
           path="/admin"

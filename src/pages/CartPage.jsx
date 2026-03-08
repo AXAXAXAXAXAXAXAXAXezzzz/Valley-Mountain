@@ -14,11 +14,11 @@ export default function CartPage() {
     <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
       <section className="space-y-4">
         {items.map((item) => (
-          <article key={item.key} className="glass-card flex gap-4 p-4">
-            <img src={item.image} alt={item.name} className="h-28 w-24 rounded-2xl object-cover" />
+          <article key={item.key} className="glass-card flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
+            <img src={item.image} alt={item.name} className="h-56 w-full rounded-2xl object-cover sm:h-28 sm:w-24" />
             <div className="flex flex-1 flex-col justify-between">
               <div>
-                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <h3 className="text-base font-semibold sm:text-lg">{item.name}</h3>
                 <p className="text-sm text-zinc-500">
                   {item.size} / {item.color}
                 </p>
@@ -30,7 +30,7 @@ export default function CartPage() {
                   min="1"
                   value={item.qty}
                   onChange={(event) => updateQty(item.key, Number(event.target.value) || 1)}
-                  className="w-20 rounded-full border border-zinc-300 bg-white px-3 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                  className="w-20 rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900 sm:text-sm"
                 />
                 <button className="inline-btn" onClick={() => removeFromCart(item.key)}>
                   Remove
@@ -41,7 +41,7 @@ export default function CartPage() {
         ))}
       </section>
 
-      <aside className="glass-card h-fit space-y-3 p-6">
+      <aside className="glass-card h-fit space-y-3 p-4 sm:p-6">
         <h2 className="text-xl font-semibold">Summary</h2>
         <div className="flex items-center justify-between text-sm">
           <span>Items</span>

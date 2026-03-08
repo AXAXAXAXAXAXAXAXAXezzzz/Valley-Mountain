@@ -130,15 +130,15 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <section className="glass-card overflow-hidden">
-        <div className="relative p-6 sm:p-8">
+        <div className="relative p-4 sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 to-zinc-700 opacity-95 dark:from-zinc-100 dark:to-zinc-300" />
-          <div className="relative flex flex-wrap items-center justify-between gap-4 text-white dark:text-zinc-900">
+          <div className="relative flex flex-col gap-4 text-white dark:text-zinc-900 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 text-xl font-semibold backdrop-blur dark:bg-zinc-900/15">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-lg font-semibold backdrop-blur dark:bg-zinc-900/15 sm:h-14 sm:w-14 sm:text-xl">
                 {initials}
               </div>
               <div>
-                <h1 className="font-serif text-4xl">{user.name}</h1>
+                <h1 className="font-serif text-2xl sm:text-4xl">{user.name}</h1>
                 <p className="text-sm opacity-90">{user.email}</p>
               </div>
             </div>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
 
       {tab === "overview" && (
         <section className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
-          <div className="glass-card p-6">
+          <div className="glass-card p-4 sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-semibold">Recent Orders</h2>
               <button className="inline-btn" onClick={() => setTab("orders")}>
@@ -198,7 +198,7 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <div className="glass-card p-6">
+          <div className="glass-card p-4 sm:p-6">
             <h2 className="text-2xl font-semibold">Quick Links</h2>
             <div className="mt-4 space-y-2">
               <Link to="/catalog" className="inline-btn w-full justify-center">
@@ -220,7 +220,7 @@ export default function ProfilePage() {
       )}
 
       {tab === "orders" && (
-        <section className="glass-card p-6">
+        <section className="glass-card p-4 sm:p-6">
           <h2 className="text-2xl font-semibold">Order History</h2>
           {loading ? (
             <p className="mt-3 text-sm text-zinc-500">Loading orders...</p>
@@ -255,14 +255,14 @@ export default function ProfilePage() {
 
       {tab === "wishlist" && (
         <section className="space-y-4">
-          <div className="flex items-end justify-between">
+          <div className="flex flex-wrap items-end justify-between gap-2">
             <h2 className="text-2xl font-semibold">Wishlist</h2>
             <span className="text-sm text-zinc-500">{wishlistProducts.length} saved products</span>
           </div>
           {wishlistProducts.length === 0 ? (
             <EmptyState title="Wishlist is empty" description="Save products from catalog to see them here." />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {wishlistProducts.map((item) => (
                 <ProductCard key={item._id} product={item} compact />
               ))}
@@ -273,7 +273,7 @@ export default function ProfilePage() {
 
       {tab === "settings" && (
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="glass-card space-y-3 p-6">
+          <div className="glass-card space-y-3 p-4 sm:p-6">
             <h2 className="text-2xl font-semibold">Profile Settings</h2>
             <Field label="Full name" value={form.name} onChange={(value) => setForm((prev) => ({ ...prev, name: value }))} />
             <Field label="Email" value={form.email} onChange={(value) => setForm((prev) => ({ ...prev, email: value }))} />
@@ -284,7 +284,7 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          <div className="glass-card space-y-4 p-6">
+          <div className="glass-card space-y-4 p-4 sm:p-6">
             <h2 className="text-2xl font-semibold">Preferences</h2>
             <ToggleRow
               label="Newsletter"
@@ -316,10 +316,10 @@ export default function ProfilePage() {
 
 function StatCard({ title, value, icon }) {
   return (
-    <div className="glass-card p-5">
+    <div className="glass-card p-4 sm:p-5">
       <div className="mb-2 inline-flex rounded-full border border-zinc-300 p-2 dark:border-zinc-700">{icon}</div>
       <p className="text-sm text-zinc-500">{title}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
+      <p className="mt-1 text-xl font-semibold sm:text-2xl">{value}</p>
     </div>
   );
 }

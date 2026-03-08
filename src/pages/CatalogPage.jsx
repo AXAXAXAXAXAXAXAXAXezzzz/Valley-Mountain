@@ -235,12 +235,12 @@ export default function CatalogPage() {
     <div className="space-y-6">
       <div className="reveal">
         <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Catalog</p>
-        <h1 className="font-serif text-5xl">Engineered Wardrobe</h1>
+        <h1 className="font-serif text-3xl sm:text-5xl">Engineered Wardrobe</h1>
       </div>
 
       <section className="glass-card reveal reveal-delay-1 space-y-4 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button className="inline-btn" onClick={() => setFiltersOpen((prev) => !prev)}>
               <SlidersHorizontal size={14} />
               {filtersOpen ? "Hide Filters" : "Show Filters"}
@@ -254,7 +254,7 @@ export default function CatalogPage() {
               List
             </button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm text-zinc-500">{filtered.length} products</p>
             <button className="inline-btn" onClick={clearFilters}>
               <X size={14} />
@@ -282,7 +282,7 @@ export default function CatalogPage() {
         <EmptyState title="No products found" description="Adjust filters to discover more items." />
       ) : (
         <>
-          <div className={`reveal reveal-delay-2 gap-4 ${viewMode === "grid" ? "grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid grid-cols-1"}`}>
+          <div className={`reveal reveal-delay-2 gap-3 sm:gap-4 ${viewMode === "grid" ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid grid-cols-1"}`}>
             {visibleProducts.map((product) => (
               <ProductCard key={product._id} product={product} mode={viewMode} onQuickView={setQuickProduct} />
             ))}
@@ -301,7 +301,7 @@ export default function CatalogPage() {
       {quickProduct && (
         <Modal title={quickProduct.name} onClose={() => setQuickProduct(null)}>
           <div className="grid gap-4 md:grid-cols-[220px,1fr]">
-            <img src={quickProduct.images?.[0]} alt={quickProduct.name} className="h-56 w-full rounded-2xl object-cover" />
+            <img src={quickProduct.images?.[0]} alt={quickProduct.name} className="h-44 w-full rounded-2xl object-cover sm:h-56" />
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{quickProduct.category}</p>
               <p className="text-lg font-semibold">{formatCurrency(quickProduct.price)}</p>

@@ -272,7 +272,7 @@ export default function ProductPage() {
 
       <section className="space-y-4">
         <h2 className="font-serif text-4xl">You May Also Like</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {related.map((item) => (
             <ProductCard key={item._id} product={item} />
           ))}

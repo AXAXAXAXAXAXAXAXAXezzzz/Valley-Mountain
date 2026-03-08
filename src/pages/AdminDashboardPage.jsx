@@ -1,7 +1,13 @@
 import { AlertCircle, BarChart3, ImageUp, MessageSquare, Package2, Plus, Search, ShieldCheck, Star, Trash2, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { addDoc, collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import Modal from "../components/ui/Modal";
+import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { db } from "../firebase";
+import { useConversationMessages } from "../hooks/useConversationMessages";
+import { useRealtimeUsers } from "../hooks/useRealtimeUsers";
+import { useSupportConversations } from "../hooks/useSupportConversations";
 import { orderService } from "../services/api/orderService";
 import { productService } from "../services/api/productService";
 import { reviewService } from "../services/api/reviewService";
@@ -57,8 +63,10 @@ const normalizeCode = (value, fallbackIndex) => {
 };
 
 export default function AdminDashboardPage() {
+  const { user: currentUser } = useAuth();
   const { pushToast } = useToast();
   const [tab, setTab] = useState("products");
+  const [workspace, setWorkspace] = useState("admin");
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
@@ -72,6 +80,19 @@ export default function AdminDashboardPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [activeConversationId, setActiveConversationId] = useState("");
+  const [supportReply, setSupportReply] = useState("");
+  const { users: realtimeUsers, loading: usersRealtimeLoading } = useRealtimeUsers();
+  const { conversations, loading: conversationsLoading } = useSupportConversations();
+  const { messages: conversationMessages, loading: messagesLoading } = useConversationMessages(activeConversationId);
+
+  const role = currentUser?.role || (currentUser?.isAdmin ? "admin" : "user");
+  const workspaceOptions = useMemo(() => {
+    if (role === "admin") return ["admin", "mentor", "support"];
+    if (role === "mentor") return ["mentor", "support"];
+    if (role === "support") return ["support"];
+    return [];
+  }, [role]);
 
   const loadData = async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
@@ -109,6 +130,26 @@ export default function AdminDashboardPage() {
     const timer = setInterval(() => loadData({ silent: true }), 5000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!workspaceOptions.length) return;
+    if (!workspaceOptions.includes(workspace)) {
+      setWorkspace(workspaceOptions[0]);
+    }
+  }, [workspaceOptions, workspace]);
+
+  useEffect(() => {
+    if (workspace === "admin") return;
+    if (!["users", "support"].includes(tab)) {
+      setTab("support");
+    }
+  }, [workspace, tab]);
+
+  useEffect(() => {
+    if (!activeConversationId && conversations.length) {
+      setActiveConversationId(conversations[0].id);
+    }
+  }, [conversations, activeConversationId]);
 
   const filteredProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -307,13 +348,46 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const sendSupportReply = async () => {
+    if (!activeConversationId || !supportReply.trim()) return;
+    try {
+      const selectedConversation = conversations.find((item) => item.id === activeConversationId);
+      await addDoc(collection(db, "support_conversations", activeConversationId, "messages"), {
+        text: supportReply.trim(),
+        image: "",
+        senderUid: currentUser?.uid || "staff",
+        senderRole: workspace,
+        senderName: currentUser?.fullName || currentUser?.displayName || currentUser?.name || "Support",
+        createdAt: serverTimestamp(),
+      });
+      await setDoc(
+        doc(db, "support_conversations", activeConversationId),
+        {
+          status: "open",
+          lastMessage: supportReply.trim(),
+          lastMessageAt: serverTimestamp(),
+          lastMessageBy: workspace,
+          unreadBySupport: false,
+          unreadByUser: true,
+          userName: selectedConversation?.userName || "",
+          userEmail: selectedConversation?.userEmail || "",
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      setSupportReply("");
+    } catch {
+      pushToast("Failed to send support reply", "error");
+    }
+  };
+
   return (
     <div className="space-y-5">
       <section className="glass-card p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.16em] text-zinc-500">Admin Control</p>
-            <h1 className="font-serif text-4xl">Valley Mountain Dashboard</h1>
+            <h1 className="font-serif text-2xl sm:text-4xl">Valley Mountain Dashboard</h1>
           </div>
           <div className="flex flex-wrap gap-2">
             <Stat title="Sales" value={formatCurrency(salesStats.totalRevenue)} icon={<BarChart3 size={14} />} />
@@ -324,19 +398,37 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="glass-card p-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">Workspace switcher</p>
+          <div className="inline-flex rounded-full border border-zinc-300 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900">
+            {workspaceOptions.map((mode) => (
+              <button
+                key={mode}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] transition ${
+                  workspace === mode
+                    ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+                }`}
+                onClick={() => setWorkspace(mode)}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-wrap gap-2">
-          <Tab active={tab === "products"} onClick={() => setTab("products")} icon={<Package2 size={14} />} label="Products" />
-          <Tab active={tab === "sales"} onClick={() => setTab("sales")} icon={<BarChart3 size={14} />} label="Sales" />
+          {workspace === "admin" ? <Tab active={tab === "products"} onClick={() => setTab("products")} icon={<Package2 size={14} />} label="Products" /> : null}
+          {workspace === "admin" ? <Tab active={tab === "sales"} onClick={() => setTab("sales")} icon={<BarChart3 size={14} />} label="Sales" /> : null}
           <Tab active={tab === "users"} onClick={() => setTab("users")} icon={<Users size={14} />} label="Users" />
           <Tab active={tab === "support"} onClick={() => setTab("support")} icon={<MessageSquare size={14} />} label="Support" />
-          <Tab active={tab === "reviews"} onClick={() => setTab("reviews")} icon={<Star size={14} />} label="Reviews" />
-          <Tab active={tab === "categories"} onClick={() => setTab("categories")} icon={<ShieldCheck size={14} />} label="Categories" />
+          {workspace === "admin" ? <Tab active={tab === "reviews"} onClick={() => setTab("reviews")} icon={<Star size={14} />} label="Reviews" /> : null}
+          {workspace === "admin" ? <Tab active={tab === "categories"} onClick={() => setTab("categories")} icon={<ShieldCheck size={14} />} label="Categories" /> : null}
         </div>
       </section>
 
       {loading ? <div className="glass-card p-6 text-sm text-zinc-500">Loading admin data...</div> : null}
 
-      {!loading && tab === "products" && (
+      {!loading && workspace === "admin" && tab === "products" && (
         <section className="space-y-4">
           <div className="glass-card flex flex-wrap items-center justify-between gap-3 p-4">
             <label className="relative w-full max-w-sm">
@@ -355,7 +447,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="glass-card overflow-hidden">
-            <div className="grid grid-cols-[90px,1.8fr,1fr,120px,120px,120px,260px] gap-2 border-b border-zinc-200/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:border-zinc-800">
+            <div className="grid grid-cols-[46px,1.1fr,0.7fr,58px,58px,46px,118px] gap-1 border-b border-zinc-200/80 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-zinc-500 sm:grid-cols-[90px,1.8fr,1fr,120px,120px,120px,260px] sm:gap-2 sm:px-3 sm:text-xs sm:tracking-[0.12em] dark:border-zinc-800">
               <span>ID</span>
               <span>Product</span>
               <span>Category</span>
@@ -368,25 +460,25 @@ export default function AdminDashboardPage() {
               {filteredProducts.map((item) => (
                 <div
                   key={item._id}
-                  className="grid grid-cols-[90px,1.8fr,1fr,120px,120px,120px,260px] items-center gap-2 border-b border-zinc-200/75 px-3 py-2 text-sm dark:border-zinc-800"
+                  className="grid grid-cols-[46px,1.1fr,0.7fr,58px,58px,46px,118px] items-center gap-1 border-b border-zinc-200/75 px-2 py-2 text-[10px] sm:grid-cols-[90px,1.8fr,1fr,120px,120px,120px,260px] sm:gap-2 sm:px-3 sm:text-sm dark:border-zinc-800"
                 >
-                  <span className="font-medium">{item.productCode || item._id}</span>
+                  <span className="truncate font-medium">{item.productCode || item._id}</span>
                   <div className="min-w-0">
                     <p className="truncate font-medium">{item.name}</p>
-                    <p className="truncate text-xs text-zinc-500">{item._id}</p>
+                    <p className="truncate text-[9px] text-zinc-500 sm:text-xs">{item._id}</p>
                   </div>
-                  <span className="capitalize">{item.category}</span>
-                  <span>{formatCurrency(item.price)}</span>
-                  <span>{formatCurrency(item.logistics ?? 2)}</span>
+                  <span className="truncate capitalize">{item.category}</span>
+                  <span className="truncate">{formatCurrency(item.price)}</span>
+                  <span className="truncate">{formatCurrency(item.logistics ?? 2)}</span>
                   <span>{item.stock}</span>
-                  <div className="flex flex-wrap gap-2">
-                    <button className="inline-btn !px-3 !py-1.5 text-xs" onClick={() => openEdit(item)}>
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
+                    <button className="inline-btn !px-1.5 !py-1 text-[10px] sm:!px-3 sm:!py-1.5 sm:text-xs" onClick={() => openEdit(item)}>
                       Edit
                     </button>
-                    <button className="inline-btn !px-3 !py-1.5 text-xs" onClick={() => duplicateProduct(item)}>
+                    <button className="inline-btn !px-1.5 !py-1 text-[10px] sm:!px-3 sm:!py-1.5 sm:text-xs" onClick={() => duplicateProduct(item)}>
                       Duplicate
                     </button>
-                    <button className="inline-btn !px-3 !py-1.5 text-xs text-red-600 dark:text-red-400" onClick={() => deleteProduct(item._id)}>
+                    <button className="inline-btn !px-1.5 !py-1 text-[10px] text-red-600 sm:!px-3 sm:!py-1.5 sm:text-xs dark:text-red-400" onClick={() => deleteProduct(item._id)}>
                       Delete
                     </button>
                   </div>
@@ -397,17 +489,17 @@ export default function AdminDashboardPage() {
         </section>
       )}
 
-      {!loading && tab === "sales" && (
+      {!loading && workspace === "admin" && tab === "sales" && (
         <section className="grid gap-4 lg:grid-cols-[1fr,1.2fr]">
           <div className="glass-card space-y-3 p-5">
-            <h2 className="text-2xl font-semibold">Sales Overview</h2>
+            <h2 className="text-xl font-semibold sm:text-2xl">Sales Overview</h2>
             <SalesLine label="Total Revenue" value={formatCurrency(salesStats.totalRevenue)} />
             <SalesLine label="Today Revenue" value={formatCurrency(salesStats.todayRevenue)} />
             <SalesLine label="Total Orders" value={salesStats.ordersCount} />
             <SalesLine label="Items Sold" value={salesStats.itemsSold} />
           </div>
           <div className="glass-card p-5">
-            <h2 className="mb-3 text-2xl font-semibold">Top Selling Products</h2>
+            <h2 className="mb-3 text-xl font-semibold sm:text-2xl">Top Selling Products</h2>
             {topProducts.length === 0 ? (
               <p className="text-sm text-zinc-500">No sales data yet.</p>
             ) : (
@@ -429,23 +521,32 @@ export default function AdminDashboardPage() {
 
       {!loading && tab === "users" && (
         <section className="glass-card p-4">
-          <h2 className="mb-3 text-2xl font-semibold">All Users</h2>
+          <h2 className="mb-3 text-xl font-semibold sm:text-2xl">Realtime Users</h2>
+          {usersRealtimeLoading ? <p className="mb-3 text-sm text-zinc-500">Loading users...</p> : null}
           <div className="space-y-2">
-            {users.map((item) => (
+            {realtimeUsers.map((item) => (
               <div key={item._id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700">
                 <div>
-                  <p className="font-medium">{item.name}</p>
+                  <p className="font-medium">{item.fullName || item.displayName || item.name || "User"}</p>
+                  <p className="text-xs text-zinc-500">{item.username ? `@${item.username}` : "No username"}</p>
                   <p className="text-xs text-zinc-500">{item.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full border border-zinc-300 px-3 py-1 text-xs dark:border-zinc-700">{item.isAdmin ? "Admin" : "User"}</span>
-                  {!item.isAdmin ? (
+                  <span className={`rounded-full border px-3 py-1 text-xs dark:border-zinc-700 ${item.online ? "border-emerald-400 text-emerald-600 dark:text-emerald-300" : "border-zinc-300 text-zinc-500"}`}>
+                    {item.online ? "Online" : "Offline"}
+                  </span>
+                  <span className="rounded-full border border-zinc-300 px-3 py-1 text-xs capitalize dark:border-zinc-700">{item.role || "user"}</span>
+                  {workspace === "admin" && !(item.role === "admin" || item.isAdmin) ? (
                     <button className="inline-btn !px-3 !py-1.5 text-xs text-red-600 dark:text-red-400" onClick={() => deleteUser(item._id)}>
                       <Trash2 size={12} />
                       Delete
                     </button>
                   ) : null}
                 </div>
+                <p className="w-full text-xs text-zinc-500">
+                  Joined: {item.createdAt?.seconds ? new Date(item.createdAt.seconds * 1000).toLocaleString("en-GB") : "n/a"} | Last seen:{" "}
+                  {item.lastSeen?.seconds ? new Date(item.lastSeen.seconds * 1000).toLocaleString("en-GB") : "n/a"}
+                </p>
               </div>
             ))}
           </div>
@@ -453,48 +554,69 @@ export default function AdminDashboardPage() {
       )}
 
       {!loading && tab === "support" && (
-        <section className="glass-card p-4">
-          <h2 className="mb-3 text-2xl font-semibold">Tech Support Tickets</h2>
-          {tickets.length === 0 ? (
-            <p className="text-sm text-zinc-500">No tickets yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {tickets.map((ticket) => (
-                <div key={ticket._id} className="rounded-2xl border border-zinc-200 p-3 dark:border-zinc-700">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <p className="font-medium">{ticket.subject}</p>
-                      <p className="text-xs text-zinc-500">
-                        {ticket.userName} - {ticket.userEmail}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        className={`inline-btn !px-3 !py-1.5 text-xs ${ticket.status === "open" ? "border-amber-400 text-amber-600 dark:text-amber-300" : ""}`}
-                        onClick={() => updateTicketStatus(ticket, "open")}
-                      >
-                        Open
-                      </button>
-                      <button
-                        className={`inline-btn !px-3 !py-1.5 text-xs ${ticket.status === "resolved" ? "border-emerald-400 text-emerald-600 dark:text-emerald-300" : ""}`}
-                        onClick={() => updateTicketStatus(ticket, "resolved")}
-                      >
-                        Resolved
-                      </button>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-200">{ticket.message}</p>
-                  {ticket.image ? <img src={ticket.image} alt="ticket" className="mt-2 h-24 w-24 rounded-xl object-cover" /> : null}
-                </div>
+        <section className="grid gap-4 lg:grid-cols-[320px,1fr]">
+          <div className="glass-card p-4">
+            <h2 className="mb-3 text-xl font-semibold sm:text-2xl">Conversations</h2>
+            {conversationsLoading ? <p className="text-sm text-zinc-500">Loading conversations...</p> : null}
+            <div className="space-y-2">
+              {conversations.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  className={`w-full rounded-2xl border px-3 py-2 text-left text-sm transition ${
+                    activeConversationId === conversation.id
+                      ? "border-zinc-950 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
+                      : "border-zinc-200 dark:border-zinc-700"
+                  }`}
+                  onClick={() => setActiveConversationId(conversation.id)}
+                >
+                  <p className="font-medium">{conversation.userName || conversation.userEmail || conversation.id}</p>
+                  <p className="truncate text-xs text-zinc-500">{conversation.lastMessage || "No messages yet"}</p>
+                </button>
               ))}
             </div>
-          )}
+          </div>
+
+          <div className="glass-card p-4">
+            <h2 className="mb-3 text-xl font-semibold sm:text-2xl">Support Workspace ({workspace})</h2>
+            {messagesLoading ? <p className="text-sm text-zinc-500">Loading messages...</p> : null}
+            <div className="max-h-[48vh] space-y-2 overflow-y-auto rounded-2xl border border-zinc-200 p-3 dark:border-zinc-700">
+              {conversationMessages.map((message) => {
+                const isStaff = ["admin", "mentor", "support"].includes(message.senderRole);
+                return (
+                  <div key={message.id} className={`flex ${isStaff ? "justify-end" : "justify-start"}`}>
+                    <div className="max-w-[85%] rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+                      <p>{message.text}</p>
+                      {message.image ? <img src={message.image} alt="attachment" className="mt-2 h-24 w-24 rounded-lg object-cover" /> : null}
+                      <p className="mt-1 text-right text-xs text-zinc-500">{message.senderRole || "user"}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <input
+                className="w-full rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                placeholder="Write reply..."
+                value={supportReply}
+                onChange={(event) => setSupportReply(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    sendSupportReply();
+                  }
+                }}
+              />
+              <button className="inline-btn-primary sm:shrink-0" onClick={sendSupportReply}>
+                Reply
+              </button>
+            </div>
+          </div>
         </section>
       )}
 
-      {!loading && tab === "reviews" && (
+      {!loading && workspace === "admin" && tab === "reviews" && (
         <section className="glass-card p-4">
-          <h2 className="mb-3 text-2xl font-semibold">Product Reviews</h2>
+          <h2 className="mb-3 text-xl font-semibold sm:text-2xl">Product Reviews</h2>
           {reviews.length === 0 ? (
             <p className="text-sm text-zinc-500">No reviews yet.</p>
           ) : (
@@ -525,9 +647,9 @@ export default function AdminDashboardPage() {
         </section>
       )}
 
-      {!loading && tab === "categories" && (
+      {!loading && workspace === "admin" && tab === "categories" && (
         <section className="glass-card p-4">
-          <h2 className="mb-3 text-2xl font-semibold">Categories</h2>
+          <h2 className="mb-3 text-xl font-semibold sm:text-2xl">Categories</h2>
           <div className="mb-3 flex flex-wrap gap-2">
             <input
               className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"

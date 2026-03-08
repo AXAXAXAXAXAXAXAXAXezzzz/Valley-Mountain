@@ -20,8 +20,8 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="glass-card mx-auto max-w-3xl p-8">
-      <h1 className="font-serif text-4xl">Checkout</h1>
+    <div className="glass-card mx-auto max-w-3xl p-4 sm:p-8">
+      <h1 className="font-serif text-3xl sm:text-4xl">Checkout</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 grid gap-4 md:grid-cols-2">
         <input
           className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"

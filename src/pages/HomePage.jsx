@@ -180,25 +180,25 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-16">
-      <section className="relative overflow-hidden rounded-[2.2rem] border border-zinc-200/70 bg-zinc-950 px-6 py-10 text-white sm:px-10 sm:py-14 dark:border-zinc-800">
+    <div className="space-y-10 sm:space-y-16">
+      <section className="vm-hero relative overflow-hidden rounded-[2rem] border border-zinc-200/70 bg-zinc-500 px-4 py-8 text-white sm:rounded-[2.2rem] sm:px-10 sm:py-14 dark:border-zinc-800">
         <img
           src="/fon.png"
           alt="Hero"
-          className="absolute inset-0 h-[108%] w-full -translate-y-4 object-cover object-center opacity-55"
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/38 to-black/22" />
-        <p className="pointer-events-none absolute bottom-6 right-8 hidden text-4xl font-semibold tracking-[0.22em] text-white/10 lg:block">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-black/12 to-black/8" />
+        <p className="pointer-events-none absolute bottom-5 right-4 hidden text-3xl font-semibold tracking-[0.22em] text-white/10 lg:block">
           VALLEY MOUNTAIN
         </p>
 
-        <div className="relative max-w-3xl space-y-6">
+        <div className="relative max-w-4xl space-y-4 sm:space-y-6">
           <p className="reveal text-[11px] uppercase tracking-[0.22em] text-zinc-200">new era of essentials</p>
-          <h1 className="reveal reveal-delay-1 font-serif text-5xl leading-[0.95] text-zinc-200 sm:text-6xl lg:text-7xl">
+          <h1 className="reveal reveal-delay-1 font-serif text-4xl leading-[0.95] text-zinc-100 sm:text-6xl lg:text-7xl">
             Valley Mountain.
-            <span className="block text-zinc-300">Move With Intent.</span>
+            <span className="block text-zinc-100">Move With Intent.</span>
           </h1>
-          <p className="reveal reveal-delay-2 max-w-xl text-base text-zinc-200/95">
+          <p className="reveal reveal-delay-2 max-w-2xl text-sm text-zinc-100/95 sm:text-base">
             Precision-tailored essentials for movement, travel, and city rhythm.
           </p>
           <div className="reveal reveal-delay-3 flex flex-wrap gap-3">
@@ -212,7 +212,7 @@ export default function HomePage() {
           <div className="reveal reveal-delay-3 inline-flex max-w-xl rounded-full border border-white/30 bg-black/35 px-4 py-2 text-xs tracking-wide text-zinc-200">
             Valley Mountain Shop - online shop for the one who moves different.
           </div>
-          <div className="reveal reveal-delay-3 flex flex-wrap gap-6 pt-1 text-xs uppercase tracking-[0.16em] text-zinc-300">
+          <div className="reveal reveal-delay-3 flex flex-wrap gap-4 pt-1 text-[11px] uppercase tracking-[0.16em] text-zinc-300 sm:gap-6 sm:text-xs">
             <span>premium quality</span>
             <span>fast delivery</span>
             <span>easy returns</span>
@@ -250,8 +250,8 @@ export default function HomePage() {
       <SectionDivider />
 
       <section className="space-y-5 reveal">
-        <div className="flex items-end justify-between">
-          <h2 className="font-serif text-4xl">Featured Pieces</h2>
+        <div className="flex items-end justify-between gap-2">
+          <h2 className="font-serif text-3xl sm:text-4xl">Featured Pieces</h2>
           <Link to="/catalog" className="inline-btn">
             Explore all
           </Link>
@@ -260,7 +260,7 @@ export default function HomePage() {
           {loading ? (
             <SkeletonCards />
           ) : (
-            <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               {featured.map((product) => (
                 <ProductCard key={product._id} product={product} compact />
               ))}
@@ -271,12 +271,12 @@ export default function HomePage() {
       <SectionDivider />
 
       <section className="space-y-5 reveal reveal-delay-1">
-        <h2 className="font-serif text-4xl">New Products</h2>
+        <h2 className="font-serif text-3xl sm:text-4xl">New Products</h2>
         <div className="rounded-[2rem] border border-zinc-200/90 p-4 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.35)] sm:p-5 dark:border-zinc-700">
           {loading ? (
             <SkeletonCards />
           ) : (
-            <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid auto-rows-fr grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               {newProducts.map((product) => (
                 <ProductCard key={product._id} product={product} compact />
               ))}
@@ -287,8 +287,8 @@ export default function HomePage() {
       <SectionDivider />
 
       <section className="space-y-5 reveal reveal-delay-2">
-        <h2 className="font-serif text-4xl">Shop by Category</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <h2 className="font-serif text-3xl sm:text-4xl">Shop by Category</h2>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
           {categories.map((category, index) => {
             const Icon = category.icon;
             const query = categoryQueryMap[category.title.toLowerCase()] || {
@@ -303,7 +303,7 @@ export default function HomePage() {
               <Link
                 to={categoryLink}
                 key={category.title}
-                className="group relative h-72 overflow-hidden rounded-[1.75rem] border border-zinc-200/90 bg-[#f5f3ef] shadow-[0_18px_40px_-26px_rgba(0,0,0,0.45)]"
+                className="group relative h-44 overflow-hidden rounded-[1.2rem] border border-zinc-200/90 bg-[#f5f3ef] shadow-[0_18px_40px_-26px_rgba(0,0,0,0.45)] sm:h-72 sm:rounded-[1.75rem]"
                 style={{ animationDelay: `${index * 80}ms` }}
               >
                 <img
@@ -313,16 +313,16 @@ export default function HomePage() {
                     category.title === "Mask" ? "scale-125 object-center" : ""
                   }`}
                 />
-                <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/70 via-black/34 to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-between p-5 text-white">
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/45 px-3 py-1 text-xs font-semibold tracking-[0.12em] text-white backdrop-blur-sm">
-                    <Icon size={14} className="text-white/90" />
+                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/70 via-black/34 to-transparent sm:h-44" />
+                <div className="absolute inset-0 flex flex-col justify-between p-2.5 text-white sm:p-5">
+                  <div className="inline-flex w-fit items-center gap-1 rounded-full border border-white/15 bg-black/45 px-2 py-0.5 text-[9px] font-semibold tracking-[0.08em] text-white backdrop-blur-sm sm:gap-2 sm:px-3 sm:py-1 sm:text-xs sm:tracking-[0.12em]">
+                    <Icon size={10} className="text-white/90 sm:h-[14px] sm:w-[14px]" />
                     CATEGORY
                   </div>
-                  <div className="space-y-2 pb-1">
-                    <h3 className="h-10 overflow-hidden text-2xl font-semibold leading-tight text-white">{category.title}</h3>
-                    <p className="h-12 overflow-hidden text-sm leading-6 text-white/78">{category.subtitle}</p>
-                    <span className="inline-flex w-fit items-center rounded-full bg-black px-5 py-2 text-sm font-semibold text-white transition hover:bg-zinc-900">
+                  <div className="space-y-1 pb-0.5 sm:space-y-2 sm:pb-1">
+                    <h3 className="h-7 overflow-hidden text-[1.1rem] font-semibold leading-tight text-white sm:h-10 sm:text-2xl">{category.title}</h3>
+                    <p className="h-8 overflow-hidden text-[11px] leading-4 text-white/78 sm:h-12 sm:text-sm sm:leading-6">{category.subtitle}</p>
+                    <span className="inline-flex w-fit items-center rounded-full bg-black px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-zinc-900 sm:px-5 sm:py-2 sm:text-sm">
                       View category
                     </span>
                   </div>
@@ -334,13 +334,13 @@ export default function HomePage() {
       </section>
       <SectionDivider />
 
-      <section className="grid gap-4 md:grid-cols-3 reveal reveal-delay-3">
+      <section className="grid grid-cols-3 gap-2 sm:gap-4 md:grid-cols-3 reveal reveal-delay-3">
         {[
           ["Fast Delivery", "Express delivery for major cities."],
           ["Premium Materials", "Selected fabrics and lasting comfort."],
           ["Easy Returns", "14-day simple return policy."],
         ].map(([title, text]) => (
-          <div key={title} className="glass-card p-6">
+          <div key={title} className="glass-card p-4 sm:p-6">
             <h4 className="font-semibold">{title}</h4>
             <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{text}</p>
           </div>

@@ -23,8 +23,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="glass-card mx-auto max-w-md p-8">
-      <h1 className="font-serif text-4xl">Admin Login</h1>
+    <div className="glass-card mx-auto max-w-md p-4 sm:p-8">
+      <h1 className="font-serif text-3xl sm:text-4xl">Admin Login</h1>
       <form className="mt-6 space-y-3" onSubmit={handleSubmit(onSubmit)}>
         <input
           className="w-full rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
