@@ -87,9 +87,7 @@ export default function ProductCard({ product, mode = "grid", onQuickView, compa
         <div className={`absolute inset-y-0 left-3 flex items-center ${compact ? "opacity-80" : ""}`}>
           <button
             type="button"
-            className={`inline-flex items-center justify-center rounded-full bg-white/85 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-900/70 dark:text-zinc-100 dark:hover:bg-zinc-800 ${
-              compact ? "h-8 w-8" : "h-9 w-9"
-            }`}
+            className="inline-flex items-center justify-center bg-transparent p-0 text-zinc-900 shadow-none transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-100"
             onClick={showPrevImage}
             disabled={!hasCarousel}
             aria-label="Previous product image"
@@ -101,9 +99,7 @@ export default function ProductCard({ product, mode = "grid", onQuickView, compa
         <div className={`absolute inset-y-0 right-3 flex items-center ${compact ? "opacity-80" : ""}`}>
           <button
             type="button"
-            className={`inline-flex items-center justify-center rounded-full bg-white/85 text-zinc-900 shadow-sm backdrop-blur transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-900/70 dark:text-zinc-100 dark:hover:bg-zinc-800 ${
-              compact ? "h-8 w-8" : "h-9 w-9"
-            }`}
+            className="inline-flex items-center justify-center bg-transparent p-0 text-zinc-900 shadow-none transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-100"
             onClick={showNextImage}
             disabled={!hasCarousel}
             aria-label="Next product image"
